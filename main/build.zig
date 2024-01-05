@@ -1,19 +1,23 @@
 const std = @import("std");
 
 pub fn build(b: *std.build.Builder) void {
-    const mode = b.standardReleaseOptions();
-    const target = b.standardTargetOptions(.{});
+    const optimize = .Debug;
+    var target = b.standardTargetOptions(.{});
+    target.cpu_features_sub = std.Target.riscv.featureSet(&.{.a, .d, .f});
 
-    const lib = b.addStaticLibrary("zig", "src/main.zig");
-    lib.setBuildMode(mode);
-    lib.setTarget(target);
+    const lib = b.addStaticLibrary(.{
+        .name = "zig",
+        .root_source_file = .{ .path = "src/main.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
 
     if (std.os.getenv("INCLUDE_DIRS")) |include_dirs| {
         var it = std.mem.tokenize(u8, include_dirs, ";");
         while (it.next()) |dir| {
-            lib.addIncludeDir(dir);
+            lib.addIncludePath(.{.path =  dir});
         }
     }
 
-    lib.install();
+    b.installArtifact(lib);
 }
