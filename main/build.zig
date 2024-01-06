@@ -1,9 +1,8 @@
 const std = @import("std");
 
 pub fn build(b: *std.build.Builder) void {
-    const optimize = .Debug;
-    var target = b.standardTargetOptions(.{});
-    target.cpu_features_sub = std.Target.riscv.featureSet(&.{.a, .d, .f});
+    const target = b.standardTargetOptions(.{});
+    const optimize = b.standardOptimizeOption(.{});
 
     const lib = b.addStaticLibrary(.{
         .name = "zig",
@@ -15,7 +14,7 @@ pub fn build(b: *std.build.Builder) void {
     if (std.os.getenv("INCLUDE_DIRS")) |include_dirs| {
         var it = std.mem.tokenize(u8, include_dirs, ";");
         while (it.next()) |dir| {
-            lib.addIncludePath(.{.path =  dir});
+            lib.addIncludePath(.{ .path = dir });
         }
     }
 
